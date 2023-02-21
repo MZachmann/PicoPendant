@@ -25,3 +25,8 @@ There is code to serialize/load the current settings. The load happens at start 
 
 	from util import picoPendant
 	picoPendant.GlobalPico().Save()
+
+The configuration loader reads config.json and updates any fields found in config.json that exist in GlobalPico()).
+
+## SBC Support
+The SBC version of the Duet3d controller takes quite a different WiFi syntax and is not yet supported.
