@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+		{
+			"name": "serial:/COM10",
+			"uri": "serial://com10/"
+		}
+	],
+	"settings": {}
+}
