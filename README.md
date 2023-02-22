@@ -16,9 +16,12 @@ The current GUI supports two rotary encoders and one ladder switch.
 
 The leftmost encoder does the jogging. Click the switch to move between metric and inches and also to show/hide machine coordinates, so four positions.
 
-The middle encoder is multi-use but primarily sets the jog amount per click. When the button is clicked the jog amount becomes enabled/disabled and an asterisk appears - this is a safety measure. Click again to have the middle encoder switch between Duet3d devices (note mine are hardcoded into the PicoPendant init). Click again to return to jog amount.
+The middle encoder is multi-use but primarily sets the jog amount per click. When the button is clicked the jog amount becomes enabled/disabled and an asterisk appears - this is a safety measure.
 
 The right switch sets the axis being jogged. Currently setting the axis to 4 exits from RunJogger
+
+To switch devices, tap the touchscreen and the middle encoder mode changes to device select. Tap again to have the middle encoder change screen brightness. Tap one more time to return to jog amount selection.
+
 
 ## Serialization
 There is code to serialize/load the current settings. The load happens at start (main.py) but currently there is no automatic configuration save so that is a manual python call.
