@@ -60,7 +60,7 @@
           "F~part_netLabel_netPort~750~-595~180~gge117051~~0^^750~-595^^AGND~#0000FF~772~-591.45~0~~1~Times New Roman~8pt~flag_gge88^^PL~750 -595 755 -600 770 -600 770 -590 755 -590 750 -595~#0000FF~1~0~transparent~gge117063~0",
           "F~part_netLabel_netPort~710~-585~180~gge117066~~0^^710~-585^^ADC1~#0000FF~732.36~-581.03~0~~1~Times New Roman~8pt~flag_gge91^^PL~710 -585 715 -590 730 -590 730 -580 715 -580 710 -585~#0000FF~1~0~transparent~gge117078~0",
           "F~part_netLabel_netPort~750~-575~180~gge117081~~0^^750~-575^^ADC0~#0000FF~772.34~-571.03~0~~1~Times New Roman~8pt~flag_gge94^^PL~750 -575 755 -580 770 -580 770 -570 755 -570 750 -575~#0000FF~1~0~transparent~gge117093~0",
-          "F~part_netLabel_netPort~710~-565~180~gge117096~~0^^710~-565^^netPort31~#0000FF~732.25~-561.05~0~start~1~Times New Roman~8pt~flag_gge97^^PL~710 -565 715 -570 730 -570 730 -560 715 -560 710 -565~#0000FF~1~0~transparent~gge117108~0",
+          "F~part_netLabel_netPort~710~-565~180~gge117096~~0^^710~-565^^RUN~#0000FF~731.92~-561.29~0~~1~Times New Roman~8pt~flag_gge97^^PL~710 -565 715 -570 730 -570 730 -560 715 -560 710 -565~#0000FF~1~0~transparent~gge117108~0",
           "F~part_netLabel_netPort~755~-555~180~gge117111~~0^^755~-555^^GP22~#0000FF~777~-551.28~0~~1~Times New Roman~8pt~flag_gge100^^PL~755 -555 760 -560 775 -560 775 -550 760 -550 755 -555~#0000FF~1~0~transparent~gge117123~0",
           "F~part_netLabel_netPort~710~-545~180~gge117126~~0^^710~-545^^GND~#0000FF~732~-541.28~0~start~1~Times New Roman~8pt~flag_gge103^^PL~710 -545 715 -550 730 -550 730 -540 715 -540 710 -545~#0000FF~1~0~transparent~gge117138~0",
           "F~part_netLabel_netPort~755~-535~180~gge117141~~0^^755~-535^^ECLK_2~#0000FF~776.98~-531.03~0~~1~Times New Roman~8pt~flag_gge106^^PL~755 -535 760 -540 775 -540 775 -530 760 -530 755 -535~#0000FF~1~0~transparent~gge117153~0",
@@ -244,6 +244,8 @@
           "LIB~535~-100~package`C0603`BOM_Supplier`LCSC`BOM_Manufacturer`SAMSUNG(三星)`BOM_Manufacturer Part`CL10A106MA8NRNC`nameAlias`Capacitance`BOM_Supplier Part`C96446`BOM_JLCPCB Part Class`Basic Part`spicePre`C`spiceSymbolName`CL10A106MA8NRNC`~270~0~ggec4cb2e9727c264ec~f8151fdc728a41ebbc304e11d39e5437~5563491116b5449a9a46d9ad40c4d199~0~~yes~yes~a170f885cfb24d0b844254c2ab7fe87d~1672470603~0926e3918e43402fb54ef7bafea85d85#@$T~N~545~-87.64~0~#000080~Arial~~~~~comment~10uF~1~start~gge126825~0~#@$T~P~545~-96.79~0~#000080~Arial~~~~~comment~C1~1~start~gge126831~0~#@$PL~527 -102 543 -102~#A00000~1~0~none~gge126837~0#@$P~show~0~1~535~-120~90~gge126840~0^^535~-120^^M 535 -110 v -10~#800^^0~535~-106~270~1~end~~~#800^^0~531~-114~270~1~start~~~#800^^0~535~-133^^0~M 532 -130 L 535 -127 L 538 -130#@$PL~535 -90 535 -98~#A00000~1~0~none~gge126861~0#@$PL~543 -98 527 -98~#A00000~1~0~none~gge126864~0#@$P~show~0~2~535~-80~270~gge126867~0^^535~-80^^M 535 -90 v 10~#800^^0~535~-94~270~2~start~~~#800^^0~531~-86~270~2~end~~~#800^^0~535~-67^^0~M 538 -70 L 535 -73 L 532 -70#@$PL~535 -102 535 -110~#A00000~1~0~none~gge126888~0",
           "W~535 -120 535 -135~#008800~1~0~none~gge126891~0",
           "W~535 -80 500 -80 500 -100 410 -100~#008800~1~0~none~gge126897~0",
+          "F~part_netLabel_netPort~290~-545~180~gge126902~~0^^290~-545^^RUN~#0000FF~311.92~-541.29~0~~1~Times New Roman~8pt~gge126908^^PL~290 -545 295 -550 310 -550 310 -540 295 -540 290 -545~#0000FF~1~0~transparent~gge126914~0",
+          "W~265 -550 265 -545 290 -545~#008800~1~0~none~gge126932~0",
           "J~310~-145~2.5~#CC0000~gge122585~0",
           "J~535~-135~2.5~#CC0000~gge122594~0",
           "J~895~-200~2.5~#CC0000~gge123605~0",
@@ -268,9 +270,9 @@
         ],
         "BBox": {
           "x": 0,
-          "y": -806.7,
+          "y": -806.9,
           "width": 1149,
-          "height": 806.9
+          "height": 807.5
         },
         "colors": {}
       }
