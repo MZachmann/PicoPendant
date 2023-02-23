@@ -18,9 +18,11 @@ The leftmost encoder does the jogging. Click the switch to move between metric a
 
 The middle encoder is multi-use but primarily sets the jog amount per click. When the button is clicked the jog amount becomes enabled/disabled and an asterisk appears - this is a safety measure.
 
-The right switch sets the axis being jogged. Currently setting the axis to 4 exits from RunJogger
+The right switch sets the axis being jogged. 
 
 To switch devices, tap the touchscreen and the middle encoder mode changes to device select. Tap again to have the middle encoder change screen brightness. Tap one more time to return to jog amount selection.
+
+To exit cleanly from RunJogger press both rotary encoder buttons at the same time.
 
 
 ## Serialization

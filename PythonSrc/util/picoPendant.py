@@ -66,12 +66,13 @@ class PicoPendant(dict):
 		self['wlan_password'] = secrets['wlan_password']
 		self['units'] = 'm' # 'i' or 'm'
 		# hokie but useful
-		self['devices'] = ['CNC', 'Mill', 'Printer']  # all
+		self['devices'] = ['CNC', 'Mill', 'Printer', 'Null']  # all
 		self['device'] = 'CNC'	# current
 		self['token'] = ''
 		self['CNC'] =		{ 'ip' : 'http://192.168.0.58', 'sbc' : 'N', 'pwd' : '' }
 		self['Mill'] = 		{ 'ip' : 'http://192.168.0.53', 'sbc' : 'N', 'pwd' : '' }
 		self['Printer'] = 	{ 'ip' : 'http://192.168.0.57', 'sbc' : 'N', 'pwd' : '' }
+		self['Null'] = 	{ 'ip' : '0.0.0.0', 'sbc' : 'N', 'pwd' : '' } # dummy to not affect anything
 
 	def Initialize(self) :
 		'''setup the default settings and then load overrides and other settings'''

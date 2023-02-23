@@ -2,16 +2,15 @@
 from util.picoPendant import GlobalObjects, GlobalPico
 from display.lcdDriver import GlobalLcd
 from display.ioBox import IoBox
-from display.colorSet import SolidClr
 from util import encoder, ladderSw
 
 # pp_screen is the base class for screens
 
-
 class pp_screen :
 
 	def __init__(self) :
-		self.encoder1 = encoder.EncoderSw(2)
+		''' define the encoders and switches which are mapped to operations '''
+		self.encoder1 = encoder.EncoderSw(0)
 		self.encoder2 = encoder.EncoderSw(1)
 		self.switch1 = ladderSw.LadderSw(0, [6.7,13.5,20.3,27,31.75,37])
 

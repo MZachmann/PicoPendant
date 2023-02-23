@@ -14,9 +14,11 @@ Currently the touchscreen location can not be read because this requires a much 
 * Performance<br>
 Due to the unwillingness to keep trying to use thread or asynch there are some performance concerns where WiFi waiting for responses causes GUI lags. This is solvable but not yet worth the trouble until other things are solid.
 * Rotary Encoders<br>
-The current switch-based encoders are pretty weak (coarse and occasional step-loss) but very cheap - the usual tradeoff. Using a real optical encoder for the movement rotary would help a lot and I may switch to that at some point since I have one lying around.
+The current switch-based encoders are pretty weak (coarse and occasional step-loss) but very cheap - the usual tradeoff. Using a real optical encoder for the movement rotary would help and I may switch to that at some point since I have one lying around.
 * MicroPython<br>
 Both MicroPython and CircuitPython are still in beta for the Raspberry Pi Pico W and it shows. CircuitPython is unstable, has no thread support, and the wifi support is very bad so imho unsuitable.  MicroPython has been stable and usable but I haven't yet gotten thread to work well - which is pretty necessary.
+* Random jogging<br>
+To avoid any possible jogging while running a job, the code supports setting device to null (ip = 0.0.0.0) which will not send wifi requests.
 
 ## Folders
 

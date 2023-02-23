@@ -106,7 +106,11 @@ class JogScreen(pp_screen) :
 		self.medText.SetText(backclr=u, just=None)
 		x = self.medText.width
 		self.medText.Resize(0,0)
-		self.medText.DrawText(self.GetDeviceIp(), self.xUserData, self.yDeviceInfo)
+		u = self.GetDeviceIp()
+		if u is None :
+			self.medText.DrawText('none          ', self.xUserData, self.yDeviceInfo)
+		else :
+			self.medText.DrawText(u, self.xUserData, self.yDeviceInfo)
 		self.medText.Resize(x, 0)
 		self.medText.SetText(backclr=self.BackColor, just=IoBox.JUST_RIGHT)
 
@@ -209,6 +213,8 @@ class JogScreen(pp_screen) :
 		try :
 			s = GlobalPico()['device']
 			s = GlobalPico()[s]['ip']
+			if (s is not None) and (s[0] == '0') :
+				s = None
 		except Exception as e:
 			print('dip: ' + str(e))
 		finally:
@@ -329,7 +335,7 @@ class JogScreen(pp_screen) :
 					self.DrawDesired()
 			elif self.dialEdit == 'D' :	# device
 				devices = GlobalPico()['devices']
-				p1 = po % 3
+				p1 = po % len(devices)
 				if devices[p1] != GlobalPico()['device'] :
 					GlobalPico()['device'] = devices[p1]
 					self.DrawDevice()
