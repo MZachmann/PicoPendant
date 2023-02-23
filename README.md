@@ -24,6 +24,10 @@ To switch devices, tap the touchscreen and the middle encoder mode changes to de
 
 To exit cleanly from RunJogger press both rotary encoder buttons at the same time.
 
+<span style="color:orange">There are 2 'safety' things to ensure the jogger isn't fussing your machine during jobs.</span>
+* it only sends wifi requests when the encoder mode is 'adjust tic size' (enabled or disabled)
+* you can use a Null device (0.0.0.0) to disable wifi requests
+
 
 ## Serialization
 There is code to serialize/load the current settings. The load happens at start (main.py) but currently there is no automatic configuration save so that is a manual python call.
