@@ -1,41 +1,40 @@
 # PicoPendant
-A small CNC Pendant based off the Raspberry Pi Pico W and the Waveshare Pico-ResTouch-LCD-3.5
+A small wireless CNC Pendant based off the Raspberry Pi Pico W and the Waveshare Pico-ResTouch-LCD-3.5. 
+
+The pendant uses WiFi to communicate with the CNC and can work with any CNC/Mill/3d printer device that is available on a network. The current Micropython source only supports Duet3d-based controllers because that's all I have.
 
 ## Folders
 * CircuitBoard<br>This contains the circuit board (display hat) files and readme. The circuit board has two LiPo connectors (small and regular), a LiPo charger, three encoder inputs, three A/D dividers for ladder switches and one switch input.
-* Enclosure<br>This contains a Fusion360 workspace for 3d printing an enclosure and spacers. The spacers are used to support the display hat over the Waveshare LCD. Since the hole locations are not exact and Jlcpcb seems unable to put holes in the right place anyway, the spacers are slightly offset.
+* Enclosure<br>This contains a Fusion360 workspace and result STL files for 3d printing an enclosure and spacers. The spacers are used to support the display hat over the Waveshare LCD. Since the hole locations are not exact and Jlcpcb seems unable to put holes in the right place anyway, the spacers are slightly offset.
 * PythonSrc<br>The MicroPython source code
 
-## GUI
-The current hacky gui is a single screen named 'Jog'. To run the jog screen requires the following MicroPython
+## Getting Started
 
-	from screens.jog import RunJogger
-	RunJogger()
+You may need to install a driver to have the Pico show up as a serial port. See the Raspberry Pi Pico documentation.
 
-The current GUI supports two rotary encoders and one ladder switch.
+### Installing MicroPython
+* Plug the Pico into a USB port.
+* Boot the Pico W. If it's connected to the display use the display reboot button, otherwise just power up the USB port.
+* While booting, holding down the white button on top of the Pico. This will attach a drive to the PC.
+* Copy the latest Micropython UF2 file to the attached Pico drive. When the copy is complete the Pico will reboot and Python will be installed.
 
-The leftmost encoder does the jogging. Click the switch to move between metric and inches and also to show/hide machine coordinates, so four positions.
+### Start up Visual Studio Code
+* Install Visual Studio Code
+* Add these extensions (at least)
+  * Python - adds intellisense for python
+  * Pymakr - this plugin adds USB serial support for the Pico
+* Start up Visual Studio Code and open the source folder. You should be prompted to load the PicoPendant.code-workspace as a Workspace.
 
-The middle encoder is multi-use but primarily sets the jog amount per click. When the button is clicked the jog amount becomes enabled/disabled and an asterisk appears - this is a safety measure.
-
-The right switch sets the axis being jogged. 
-
-To switch devices, tap the touchscreen and the middle encoder mode changes to device select. Tap again to have the middle encoder change screen brightness. Tap one more time to return to jog amount selection.
-
-To exit cleanly from RunJogger press both rotary encoder buttons at the same time.
-
-<span style="color:orange">There are 2 'safety' things to ensure the jogger isn't fussing your machine during jobs.</span>
-* it only sends wifi requests when the encoder mode is 'adjust tic size' (enabled or disabled)
-* you can use a Null device (0.0.0.0) to disable wifi requests
-
-
-## Serialization
-There is code to serialize/load the current settings. The load happens at start (main.py) but currently there is no automatic configuration save so that is a manual python call.
-
-	from util import picoPendant
-	picoPendant.GlobalPico().Save()
-
-The configuration loader reads config.json and updates any fields found in config.json that exist in GlobalPico()).
+### Synching and copying files
+* In Visual Studio Code switch to the pymaker extension icon in the left toolbar
+* You may need to select the Pico COM port (ensure any driver is installed)
+* As you mouse over the USB Serial Device line under PROJECTS / PicoPendant you'll see some icons appear (yeah bad UI)
+* Click the lightning bolt icon to connect to the Pico USB Serial
+* Click the box/prompt icon to open a terminal connected to the Pico
+* To copy a file to the Pico:
+  * Right click the file name and use the pymark menu to select Upload to device
+* To synchronize all files to the pico:
+  * Mouse over the USB Serial Device line in the pymakr extension and pick the arrow-to-cloud icon (yeah bad UI)
 
 ## SBC Support
 The SBC version of the Duet3d controller takes quite a different WiFi syntax and is not yet supported.

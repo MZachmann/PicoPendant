@@ -8,6 +8,36 @@ The micropython source workspace (this) uses the __pymakr__ Visual Studio Code e
 ## Source
 The source is all standard __MicroPython__. It is divided into functional groups. I attempted to use asynchronous I/O and a thread and both attempts failed miserably. Either it was running out of memory or too slow or ... anyway I pulled that stuff all out and it's just all blocking I/O for now. Maybe over time the threading will improve because network threaded is so obvious.
 
+## GUI
+The current hacky gui is a single screen named 'Jog'. To run the jog screen requires the following MicroPython
+
+	from screens.jog import RunJogger
+	RunJogger()
+
+The current GUI supports two rotary encoders and one ladder switch.
+
+The leftmost encoder does the jogging. Click the switch to move between metric and inches and also to show/hide machine coordinates, so four positions.
+
+The middle encoder is multi-use but primarily sets the jog amount per click. When the button is clicked the jog amount becomes enabled/disabled and an asterisk appears - this is a safety measure.
+
+The right switch sets the axis being jogged. 
+
+To switch devices, tap the touchscreen and the middle encoder mode changes to device select. Tap again to have the middle encoder change screen brightness. Tap one more time to return to jog amount selection.
+
+To exit cleanly from RunJogger press both rotary encoder buttons at the same time.
+
+<span style="color:orange">There are 2 'safety' things to ensure the jogger isn't fussing your machine during jobs.</span>
+* it only sends wifi requests when the encoder mode is 'adjust tic size' (enabled or disabled)
+* you can use a Null device (0.0.0.0) to disable wifi requests
+
+## Serialization
+There is code to serialize/load the current settings. The load happens at start (main.py) but currently there is no automatic configuration save so that is a manual python call.
+
+	from util import picoPendant
+	picoPendant.GlobalPico().Save()
+
+The configuration loader reads config.json and updates any fields found in config.json that exist in GlobalPico()).
+
 ## Known Concerns
 * Touchscreen<br>
 Currently the touchscreen location can not be read because this requires a much slower SPI speed and trying to temporarily switch the SPI speed to accomodate the touch location reader causes WiFi, which also uses SPI, to start failing permanently. So for now the touch location is not used.
