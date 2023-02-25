@@ -9,16 +9,15 @@ The micropython source workspace (this) uses the __pymakr__ Visual Studio Code e
 The source is all standard __MicroPython__. It is divided into functional groups. I attempted to use asynchronous I/O and a thread and both attempts failed miserably. Either it was running out of memory or too slow or ... anyway I pulled that stuff all out and it's just all blocking I/O for now. Maybe over time the threading will improve because network threaded is so obvious.
 
 ## GUI
-The current hacky gui is a single screen named 'Jog'. To run the jog screen requires the following MicroPython
+The current gui is a single screen named 'Jog'. To run the jog screen requires the following MicroPython
 
-	from screens.jog import RunJogger
-	RunJogger()
+	import runjog
 
 The current GUI supports two rotary encoders and one ladder switch.
 
 The leftmost encoder does the jogging. Click the switch to move between metric and inches and also to show/hide machine coordinates, so four positions.
 
-The middle encoder is multi-use but primarily sets the jog amount per click. When the button is clicked the jog amount becomes enabled/disabled and an asterisk appears - this is a safety measure.
+The middle encoder is multi-use but primarily sets the jog amount per click. When the button is clicked the jog amount becomes enabled/disabled and an asterisk appears - this is a safety measure. If the middle encoder is disabled then tapping the touchscreen is also disabled.
 
 The right switch sets the axis being jogged. 
 
@@ -40,7 +39,7 @@ The configuration loader reads config.json and updates any fields found in confi
 
 ## Known Concerns
 * Touchscreen<br>
-Currently the touchscreen location can not be read because this requires a much slower SPI speed and trying to temporarily switch the SPI speed to accomodate the touch location reader causes WiFi, which also uses SPI, to start failing permanently. So for now the touch location is not used.
+Currently the touchscreen location can not be read because this requires a much slower SPI speed and trying to temporarily switch the SPI speed to accomodate the touch location reader causes WiFi, which also uses SPI, to start failing permanently. So for now the touch location is not used. There is an existing issue in the MicroPython repository asking for per-device SPI speeds.
 * Performance<br>
 Due to the unwillingness to keep trying to use thread or asynch there are some performance concerns where WiFi waiting for responses causes GUI lags. This is solvable but not yet worth the trouble until other things are solid.
 * Rotary Encoders<br>
@@ -48,7 +47,7 @@ The current switch-based encoders are pretty weak (coarse and occasional step-lo
 * MicroPython<br>
 Both MicroPython and CircuitPython are still in beta for the Raspberry Pi Pico W and it shows. CircuitPython is unstable, has no thread support, and the wifi support is very bad so imho unsuitable.  MicroPython has been stable and usable but I haven't yet gotten thread to work well - which is pretty necessary.
 * Random jogging<br>
-To avoid any possible jogging while running a job, the code supports setting device to null (ip = 0.0.0.0) which will not send wifi requests.
+To avoid any possible jogging while running a job, the code supports setting device to null (ip = 0.0.0.0) which will not send wifi requests. Also, wifi is disabled unless the middle encoder is in adjust-tic-size mode (enabled or disabled). 
 
 ## Folders
 
@@ -67,9 +66,9 @@ The fonts are stored as importable .py files that produce b/w font masks - but t
 
 ### screens
 
-A really bad early gui. I want to see what gui things will be in use before spending time writing a more general probably xml-like generator.
+A very early gui. I want to see what gui things will be in use before spending time writing a more general probably xml-like generator.
 * screens is the base class. 
-* jog is the first 'screen' and currently it uses the text boxes as ways to draw but that'll switch to one textbox per field.
+* jog is the first 'screen' and currently it uses one textbox per field.
 
 ### util
 

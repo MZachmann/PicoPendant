@@ -23,16 +23,16 @@ You may need to install a driver to have the Pico show up as a serial port. See 
 * Add these extensions (at least)
   * Python - adds intellisense for python
   * Pymakr - this plugin adds USB serial support for the Pico
-* Start up Visual Studio Code and open the source folder. You should be prompted to load the PicoPendant.code-workspace as a Workspace.
+* Start up Visual Studio Code and open the source folder. You should be prompted to load the PicoPendant.code-workspace as a Workspace and that links in the Pymakr usb serial extensions.
 
 ### Synching and copying files
-* In Visual Studio Code switch to the pymaker extension icon in the left toolbar
+* In Visual Studio Code switch to the pymakr extension icon in the left toolbar
 * You may need to select the Pico COM port (ensure any driver is installed)
 * As you mouse over the USB Serial Device line under PROJECTS / PicoPendant you'll see some icons appear (yeah bad UI)
-* Click the lightning bolt icon to connect to the Pico USB Serial
-* Click the box/prompt icon to open a terminal connected to the Pico
+  * Click the lightning bolt icon to connect to the Pico USB Serial
+  * Click the box/prompt icon to open a terminal connected to the Pico
 * To copy a file to the Pico:
-  * Right click the file name and use the pymark menu to select Upload to device
+  * Right click the file name and use the pymakr menu to select Upload to device
 * To synchronize all files to the pico:
   * Mouse over the USB Serial Device line in the pymakr extension and pick the arrow-to-cloud icon (yeah bad UI)
 
