@@ -1,7 +1,7 @@
 # Enclosure
 The enclosure is designed to be 3d printed. 
 
-The component to be printed is named PicoPendant.
+The component to be printed is named Pendant.
 The design is a sandwich with 3 pieces: the top (front), the back, and the middle. There is an extra body that's tough to delete due to fusion360 but isn't printed. The top and bottom connect to the middle with short M3 screws.
 
 ## Steps:

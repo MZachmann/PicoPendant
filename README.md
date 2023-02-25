@@ -15,7 +15,7 @@ You may need to install a driver to have the Pico show up as a serial port. See 
 ### Installing MicroPython
 * Plug the Pico into a USB port.
 * Boot the Pico W. If it's connected to the display use the display reboot button, otherwise just power up the USB port.
-* While booting, holding down the white button on top of the Pico. This will attach a drive to the PC.
+* While booting, hold down the white button on top of the Pico. This will attach a drive to the PC.
 * Copy the latest Micropython UF2 file to the attached Pico drive. When the copy is complete the Pico will reboot and Python will be installed.
 
 ### Start up Visual Studio Code
