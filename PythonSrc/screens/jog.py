@@ -10,6 +10,7 @@ from display.ioBox import IoBox
 from screens.screen import pp_screen
 from util.picoPendant import GlobalPico
 from display.lcdDriver import GlobalLcd
+import gc
 
 # show X,Y,Z position, let an encoder move left/right
 # touch-screen for x-y-z or switch ? or 2 encoders for x,y
@@ -35,6 +36,7 @@ class JogScreen(pp_screen) :
 		self.Mach = [0,0,0] # location in machine coords
 		self.lspace = 4
 		self.indent = 10
+		self.yTitle = 10
 		self.dialEdit = 'T'	# tic size
 		self.showMachine = False
 		self.Brightness = 70
@@ -65,107 +67,91 @@ class JogScreen(pp_screen) :
 		''' draw the X,Y,Z values and cache the text '''
 		a = self.toEight(x)
 		if a != self.Xtext :
-			self.bigNumbers.DrawText(a, self.xXYZData, self.yX)
+			self.XInfoBox.DrawText(a)
 			self.Xtext = a
 		a = self.toEight(y)
 		if a != self.Ytext :
-			self.bigNumbers.DrawText(a,  self.xXYZData, self.yY)
+			self.YInfoBox.DrawText(a)
 			self.Ytext = a
 		a = self.toEight(z)
 		if a != self.Ztext :
-			self.bigNumbers.DrawText(a,  self.xXYZData, self.yZ)
+			self.ZInfoBox.DrawText(a)
 			self.Ztext = a
 
 	def DrawMachine(self,x,y,z) :
 		''' draw the X,Y,Z values and cache the text '''
 		a = self.toEight(x)
 		if a != self.Xmtext :
-			self.medText.DrawText(a, self.xXYZData + 10*self.bigWidth + 10, self.yX+3)
+			self.XMachBox.DrawText(a)
 			self.mXtext = a
 		a = self.toEight(y)
 		if a != self.Ymtext :
-			self.medText.DrawText(a,  self.xXYZData + 10*self.bigWidth + 10, self.yY+3)
+			self.YMachBox.DrawText(a)
 			self.Ymtext = a
 		a = self.toEight(z)
 		if a != self.Zmtext :
-			self.medText.DrawText(a,  self.xXYZData + 10*self.bigWidth + 10, self.yZ+3)
+			self.ZMachBox.DrawText(a)
 			self.Zmtext = a
 
 	def DrawTicsize(self) :
 		''' draw the tic size '''
 		u = self.HighlightColor if (self.dialEdit=='T' and self.Dial2Enabled) else self.BackColor
-		self.medText.SetText(backclr=u)
+		self.TicSizeBox.SetText(backclr=u)
 		a = self.toEight(self.ticSize)
-		self.medText.DrawText(a, self.xUserData, self.ySpeedInfo)
-		self.medText.SetText(backclr=self.BackColor)
+		self.TicSizeBox.DrawText(a)
 
 	def DrawDevice(self) :
 		''' draw the device name and ip '''
-		self.medText.DrawText(GlobalPico()['device'] + '  ', self.xUserInfo, self.yDeviceInfo)
 		u = self.HighlightColor if self.dialEdit=='D' else self.BackColor
-		self.medText.SetText(backclr=u, just=None)
-		x = self.medText.width
-		self.medText.Resize(0,0)
-		u = self.GetDeviceIp()
-		if u is None :
-			self.medText.DrawText('none          ', self.xUserData, self.yDeviceInfo)
-		else :
-			self.medText.DrawText(u, self.xUserData, self.yDeviceInfo)
-		self.medText.Resize(x, 0)
-		self.medText.SetText(backclr=self.BackColor, just=IoBox.JUST_RIGHT)
+		self.DeviceLabel.SetText(GlobalPico()['device'])
+		self.DeviceLabel.DrawText(GlobalPico()['device'])
+		a = self.GetDeviceIp()
+		if a is None :
+			a = ''
+		self.DeviceBox.SetText(a, backclr=u)
+		self.DeviceBox.Draw()
 
 	def DrawWhichAxis(self) :
 		''' draw the axis '''
-		self.medText.DrawText(self.whichAxis, self.xUserData, self.yAxisInfo)
+		self.WhichAxisBox.DrawText(self.whichAxis)
 
 	def DrawDesired(self) :
 		''' draw the desired value '''
 		if self.desiredMove == None :
-			self.medText.DrawText('--', self.xUserData, self.yDesired)
+			self.DesiredBox.DrawText('--')
 		else :
 			a = self.toEight(self.desiredMove)
-			self.medText.DrawText(a, self.xUserData, self.yDesired)
+			self.DesiredBox.DrawText(a)
 
-	def DrawEnabledIcon(self) :
+	def DrawSubUnit(self) :
 		''' draw something to show ticsize editing is disabled '''
-		if self.Dial2Enabled :
-			a = ' '
-		else:
-			a = '*'
-		self.medText.SetText(just=IoBox.JUST_LEFT)
-		self.medText.DrawText(a, self.xUnitPlus, self.ySpeedInfo)
-		self.medText.SetText(just=IoBox.JUST_RIGHT)
+		subunit = self.UnitStr
+		if not self.Dial2Enabled :
+			subunit = subunit + ' *'
+		self.SubUnitBox.DrawText(subunit)
 
 	def HighltColor(self, axis) :
 		return self.BackColor if (axis != self.whichAxis) else self.HighlightColor
 
 	def DrawAxes(self) :
-		self.bigLetters.SetText(backclr = self.HighltColor('X'))
-		self.bigLetters.DrawText('X', self.xXYZ, self.yX)
-		self.bigLetters.SetText(backclr = self.HighltColor('Y'))
-		self.bigLetters.DrawText('Y', self.xXYZ, self.yY)
-		self.bigLetters.SetText(backclr = self.HighltColor('Z'))
-		self.bigLetters.DrawText('Z', self.xXYZ, self.yZ)
+		self.XAxisBox.SetText(backclr = self.HighltColor('X'))
+		self.XAxisBox.Draw()
+		self.YAxisBox.SetText(backclr = self.HighltColor('Y'))
+		self.YAxisBox.Draw()
+		self.ZAxisBox.SetText(backclr = self.HighltColor('Z'))
+		self.ZAxisBox.Draw()
 
 	def DrawStatics(self) :
 		''' draw the labels '''
 		# self.titleBox.SetText(just = None)
-		self.titleBox.DrawText('Jog Screen', self.indent, self.yTitle)
-		nets = 'Network: %s' % str(WLAN(STA_IF))
-		self.medText.Resize(0,0)	# autosize this
-		self.medText.SetText(just=None)
-		self.medText.DrawText(nets, self.indent, self.yNet)
+		self.titleBox.Draw()
+		self.UnitBox.DrawText(self.UnitStr)
+		self.netBox.DrawText('Network: %s' % str(WLAN(STA_IF)))
 		self.DrawValues(100, 200.123, 432.789)
-		self.medText.DrawText(('mm' if self.IsMetric else 'inch'), self.xXYZData + 12*self.bigWidth, self.yX)
-		self.medText.DrawText('Axis', self.xUserInfo, self.yAxisInfo)
-		self.medText.DrawText('Tic Size', self.xUserInfo, self.ySpeedInfo)
-		self.medText.DrawText('Desired', self.xUserInfo, self.yDesired)
-		self.xUserData = self.xUserInfo + self.medText.drawer.GetStringWidth('Tic Size') + 30
-		medsize = self.medText.drawer.GetStringWidth('00000.00000')
-		self.xUnitPlus = self.xUserData + medsize + 20 + self.medText.drawer.GetStringWidth('think')
-		self.medText.DrawText(self.UnitStr, self.xUserData + medsize + 20, self.ySpeedInfo)
-		self.medText.Resize(medsize, self.medText.font.height)
-		self.medText.SetText(just=IoBox.JUST_RIGHT)
+		self.WhichAxisLabel.Draw()
+		self.TicSizeLabel.Draw()
+		self.DrawSubUnit()
+		self.DesiredLabel.Draw()
 		self.DrawAxes()
 		self.DrawWhichAxis()
 		self.DrawTicsize()
@@ -176,35 +162,112 @@ class JogScreen(pp_screen) :
 		''' draw the base screen and set up variables '''
 		self.Dial2Enabled = True
 		self.ClearScreen()
-		# font info and io boxes
-		self.titleBox = self.MakeIoBox('fontArial28')
-		self.titleBox.SetText(just=IoBox.JUST_CENTER)
-		self.bigNumbers = self.MakeIoBox('fontLucida40')
-		self.bigLetters = self.MakeIoBox('fontLucida40')
-		self.medText = self.MakeIoBox('fontArial22')
-		self.bigWidth = self.bigNumbers.drawer.GetStringWidth('0')
-		self.bigNumbers.SetText(cached = True, just = IoBox.JUST_RIGHT)
-		self.bigNumbers.Resize(10*self.bigWidth, self.bigNumbers.font.height)
-		# now decide on position stuff
-		self.yTitle = 10
-		self.yNet = self.yTitle + self.titleBox.font.height + self.lspace
-		self.yX = self.yNet + self.medText.font.height + 3*self.lspace
-		self.yY = self.yX + self.bigLetters.font.height + self.lspace
-		self.yZ = self.yY + self.bigLetters.font.height + self.lspace
-		self.xXYZ = self.indent*3
-		self.xXYZData = self.xXYZ + 35
-
-		self.xUserInfo = self.indent
-		self.yAxisInfo = self.yZ + self.bigLetters.font.height + self.lspace*2
-		self.ySpeedInfo = self.yAxisInfo + self.medText.font.height + self.lspace*2
-		self.yDesired = self.ySpeedInfo + self.medText.font.height + self.lspace*2
-		self.yDeviceInfo = self.yDesired + self.medText.font.height + self.lspace*2
-
 		self.whichAxis = 'X'
 		self.ticSize = 1		# 1 mm
 		self.ticValue = 0
 		self.desiredMove = None
 		self.checkTime = ticks_ms()
+		bigFont = 'fontLucida40'
+		medFont = 'fontArial22'
+
+		# create a couple of ioboxes for sizing first
+		self.bigBox = self.MakeIoBox(bigFont)
+		self.medBox = self.MakeIoBox(medFont)
+
+		# now decide on position stuff
+		self.yX = self.yTitle + self.bigBox.font.height + self.lspace
+		self.yY = self.yX + self.bigBox.font.height + self.lspace
+		self.yZ = self.yY + self.bigBox.font.height + self.lspace
+		self.bigWidth = self.bigBox.drawer.GetStringWidth('0') # width of a big Zero
+
+		self.xUserInfo = self.indent
+		self.yAxisInfo = self.yZ + self.bigBox.font.height + self.lspace*2
+		self.ySpeedInfo = self.yAxisInfo + self.medBox.font.height + self.lspace*2
+		self.yDesired = self.ySpeedInfo + self.medBox.font.height + self.lspace*2
+		self.yDeviceInfo = self.yDesired + self.medBox.font.height + self.lspace*2
+		self.yNet = self.yDeviceInfo + self.medBox.font.height + self.lspace
+		self.xUserData = self.xUserInfo + self.medBox.drawer.GetStringWidth('Tic Size') + 30
+
+		gc.collect()
+		print('memory free before iobox allocation = %d' % (gc.mem_free()))
+
+		# font info and io boxes
+		self.titleBox = self.MakeIoBox('fontArial28', self.indent, self.yTitle)
+		self.titleBox.SetText('Jog Screen', just=IoBox.JUST_CENTER)
+		
+		self.netBox = self.MakeIoBox(medFont, self.indent, self.yNet)
+
+		xoffset = self.indent
+		self.XAxisBox = self.MakeIoBox(bigFont, xoffset, self.yX)
+		self.XAxisBox.SetText('X')
+		self.YAxisBox = self.MakeIoBox(bigFont, xoffset, self.yY)
+		self.YAxisBox.SetText('Y')
+		self.ZAxisBox = self.MakeIoBox(bigFont, xoffset, self.yZ)
+		self.ZAxisBox.SetText('Z')
+
+		infoSize = 8 * self.bigWidth
+		self.xXYZ = self.XAxisBox.xpos + self.bigWidth + self.indent # where the coords print
+		self.XInfoBox = self.MakeIoBox(bigFont, self.xXYZ, self.yX)
+		self.XInfoBox.SetText(cached = True, just = IoBox.JUST_RIGHT)
+		self.XInfoBox.Resize(infoSize, self.bigBox.font.height)
+		self.YInfoBox = self.MakeIoBox(bigFont, self.xXYZ, self.yY)
+		self.YInfoBox.SetText(cached = True, just = IoBox.JUST_RIGHT)
+		self.YInfoBox.Resize(infoSize, self.bigBox.font.height)
+		self.ZInfoBox = self.MakeIoBox(bigFont, self.xXYZ, self.yZ)
+		self.ZInfoBox.SetText(cached = True, just = IoBox.JUST_RIGHT)
+		self.ZInfoBox.Resize(infoSize, self.bigBox.font.height)
+		# print("Axis boxes are at %d , %d" % ( self.xXYZ, self.yX))
+		# print("Axis boxes sizes %d x %d" % (infoSize, self.bigBox.font.height))
+
+		self.xXYZData = self.XInfoBox.xpos + self.XInfoBox.width + self.bigWidth * 1 # where machine coords print
+		machOff =  self.xXYZData
+		machFont = bigFont
+		self.XMachBox = self.MakeIoBox(machFont, machOff, self.yX)
+		self.XMachBox.SetText(cached = True, just = IoBox.JUST_RIGHT)
+		self.XMachBox.Resize(infoSize, self.bigBox.font.height)
+		self.YMachBox = self.MakeIoBox(machFont, machOff, self.yY)
+		self.YMachBox.SetText(cached = True, just = IoBox.JUST_RIGHT)
+		self.YMachBox.Resize(infoSize, self.bigBox.font.height)
+		self.ZMachBox = self.MakeIoBox(machFont, machOff, self.yZ)
+		self.ZMachBox.SetText(cached = True, just = IoBox.JUST_RIGHT)
+		self.ZMachBox.Resize(infoSize, self.bigBox.font.height)
+		# print("Mach boxes are at %d , %d" % ( machOff, self.yX))
+		# print("Mach boxes sizes %d x %d" % (infoSize, self.bigBox.font.height))
+
+		medsize = self.medBox.drawer.GetStringWidth('00000.00000')
+		self.WhichAxisLabel = self.MakeIoBox(medFont,  self.xUserInfo, self.yAxisInfo)
+		self.WhichAxisLabel.SetText('Axis')
+		self.WhichAxisBox =  self.MakeIoBox(medFont,  self.xUserData, self.yAxisInfo)
+		self.WhichAxisBox.SetText(just = IoBox.JUST_RIGHT)
+		self.WhichAxisBox.Resize(medsize)
+		self.TicSizeLabel = self.MakeIoBox(medFont,  self.xUserInfo, self.ySpeedInfo)
+		self.TicSizeLabel.SetText('Tic Size')
+		self.TicSizeBox =  self.MakeIoBox(medFont,  self.xUserData, self.ySpeedInfo)
+		self.TicSizeBox.SetText(just = IoBox.JUST_RIGHT)
+		self.TicSizeBox.Resize(medsize)
+		self.DesiredLabel = self.MakeIoBox(medFont,  self.xUserInfo, self.yDesired)
+		self.DesiredLabel.SetText('Desired')
+		self.DesiredBox = self.MakeIoBox(medFont,  self.xUserData, self.yDesired)
+		self.DesiredBox.SetText(just = IoBox.JUST_RIGHT)
+		self.DesiredBox.Resize(medsize)
+		# device label is different
+		self.DeviceLabel = self.MakeIoBox(medFont,  self.indent, self.yDeviceInfo)
+		devlabelmax = self.DeviceLabel.drawer.GetStringWidth('maxlabel') # max width ???
+		self.DeviceLabel.Resize(devlabelmax, self.DeviceLabel.drawer.font.height)
+		self.DeviceLabel.SetText(just=IoBox.JUST_RIGHT)
+		self.DeviceBox = self.MakeIoBox(medFont, self.DeviceLabel.xpos + self.DeviceLabel.width + self.indent, self.yDeviceInfo)
+		devsize = self.DeviceBox.drawer.GetStringWidth('https://000.000.000.000  ') # max width ???
+		self.DeviceBox.Resize(devsize, self.DeviceBox.drawer.font.height)
+
+		unitWidth =  self.titleBox.drawer.GetStringWidth('000000')
+		self.UnitBox = self.MakeIoBox('fontArial28', GlobalLcd().displayWidth - unitWidth, self.yTitle)
+		self.UnitBox.Resize(unitWidth-1, self.UnitBox.font.height)
+
+		self.SubUnitBox = self.MakeIoBox(medFont, self.TicSizeBox.xpos + self.TicSizeBox.width + self.indent, self.TicSizeBox.ypos)
+		self.SubUnitBox.Resize(self.SubUnitBox.drawer.GetStringWidth('inch * '), self.SubUnitBox.drawer.font.height) # largest field value
+
+		gc.collect()
+		print('memory free after iobox allocation = %d' % (gc.mem_free()))
 
 		self.DrawStatics()
 
@@ -311,7 +374,7 @@ class JogScreen(pp_screen) :
 					self.Dial2.Position = self.ticValue
 			self.didCheck = True
 			self.DrawTicsize()
-			self.DrawEnabledIcon()
+			self.DrawSubUnit()
 
 		po = self.Dial2.Position
 		if po != self.lastDial2Pos :

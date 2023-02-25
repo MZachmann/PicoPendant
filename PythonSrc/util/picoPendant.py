@@ -38,7 +38,7 @@ class PicoObjects(dict):
 		# font loading is the worst
 		# we don't use the smaller lucidas so remove them for more storage
 		#self['fontList'] = ['fontLucida40', 'fontLucida28', 'fontArial28', 'fontLucida22','fontArial22','fontArial11']
-		self['fontList'] = ['fontLucida40', 'fontArial28', 'fontArial22','fontArial11']
+		self['fontList'] = ['fontLucida40', 'fontArial28', 'fontArial22']
 		self.LoadFontFiles()
 		self['theme'] = Theme
 		# all the really big stuff gets allocated very early...

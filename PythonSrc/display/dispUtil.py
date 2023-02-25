@@ -15,7 +15,7 @@ def ShowDemo() :
 	oled.set_brightness(70)
 	oled.draw_filled_box(0, 0, oled.displayWidth, oled.displayHeight, SolidClr['darkgreen'])
 
-	fnt = GlobalObjects()['fontArial11']
+	fnt = GlobalObjects()['fontArial22']
 	fnt2 = GlobalObjects()['fontArial28']
 	ibxl  = IoBox(oled, fnt2)
 	ibx  = IoBox(oled, fnt)

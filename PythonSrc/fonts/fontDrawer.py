@@ -3,6 +3,9 @@
 
 from fonts.typeFont import TypeFont
 
+# fontdrawers are large and ioboxes have one, so cache them instead
+FontDrawerSet = {}
+
 # a simple struct to convert indexes to names
 class Datum() :
     def __init__(self, value) :
@@ -11,6 +14,14 @@ class Datum() :
         self.Width = value[2]       # the Width of the glyph in pixels
         self.Offset = value[3]      # the offset of the glyph start in the box
         self.Advance = value[4]     # amount to move after drawing
+
+# so we can cache font drawers
+def GetFontDrawer(font, oled) :
+    global FontDrawerSet
+    if font in FontDrawerSet.keys() :
+        return FontDrawerSet[font]
+    FontDrawerSet[font] = FontDrawer(font, oled)
+    return FontDrawerSet[font]
 
 # the class that draws characters to an Oled display
 # on init it creates a lookup table to the font metadata by character

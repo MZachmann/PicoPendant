@@ -47,8 +47,8 @@ class pp_screen :
 		oled.set_brightness(40) # testing...
 		oled.draw_filled_box(0, 0, oled.displayWidth, oled.displayHeight, self.BackColor)
 
-	def MakeIoBox(self, fontName) :
-		ibx : IoBox = IoBox(GlobalLcd(), GlobalObjects()[fontName])
+	def MakeIoBox(self, fontName, xp=0, yp=0) :
+		ibx : IoBox = IoBox(GlobalLcd(), GlobalObjects()[fontName], xpos=xp, ypos=yp)
 		ibx.SetText(foreclr=self.TextColor, backclr=self.BackColor)
 		return ibx
 
