@@ -17,7 +17,7 @@ from util.picoPendant import GlobalPico
 from utime import ticks_ms
 import uasyncio as asyncio
 
-def WebQ() :
+def EWebQ() :
 	global _webQ
 	return _webQ
 
@@ -26,7 +26,7 @@ class WebQPacket :
 		self.text = text
 		self.timeout = wait
 
-class WebQueue :
+class EWebQueue :
 	def __init__(self) :
 		self.qPackets = []
 		self.qResponses = []
@@ -106,4 +106,4 @@ class WebQueue :
 		except Exception as e:
 			print(str(e))
 
-_webQ = WebQueue()
+_webQ = EWebQueue()

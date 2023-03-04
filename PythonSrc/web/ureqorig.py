@@ -34,8 +34,9 @@ class Response:
         return ujson.loads(self.content)
 
 def uss(s, txt) :
+    print('s+%s' % txt)
     s.write(txt)
-    print(txt)
+    print('s1+%s' % txt)
 
 def sread(s) :
     u = s.readline()
@@ -84,20 +85,27 @@ def request(
 
     ai = usocket.getaddrinfo(host, port, 0, usocket.SOCK_STREAM)
     ai = ai[0]
+    print(ai)
 
     resp_d = None
     if parse_headers is not False:
         resp_d = {}
 
     s = usocket.socket(ai[0], usocket.SOCK_STREAM, ai[2])
+    print('socket built')
 
     if timeout is not None:
         # Note: settimeout is not supported on all platforms, will raise
         # an AttributeError if not available.
+        print('set timeout %d' % int(timeout))
         s.settimeout(timeout)
+        print('did set timeout %d' % int(timeout))
 
     try:
+        print('try socket connect ')
+        print(ai[-1])
         s.connect(ai[-1])
+        print('socket connected')
         if proto == "https:":
             s = ussl.wrap_socket(s, server_hostname=host)
         uss(s,b"%s /%s HTTP/1.0\r\n" % (method, path))
