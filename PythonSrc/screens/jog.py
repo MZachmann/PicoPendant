@@ -10,6 +10,7 @@ from display.ioBox import IoBox
 from screens.screen import pp_screen
 from util.picoPendant import GlobalPico
 from display.lcdDriver import GlobalLcd
+from web.wifiConnect import doConnect
 import gc
 
 # show X,Y,Z position, let an encoder move left/right
@@ -141,12 +142,26 @@ class JogScreen(pp_screen) :
 		self.ZAxisBox.SetText(backclr = self.HighltColor('Z'))
 		self.ZAxisBox.Draw()
 
+	def DrawNetwork(self) :
+		oled = GlobalLcd()
+		oled.draw_filled_box(0, self.netBox.ypos, oled.displayWidth, self.netBox.font.height, self.BackColor)
+
+		if self.dialEdit == 'N' :
+			u = self.HighlightColor if (self.dialEdit=='N' and self.Dial2Enabled) else self.BackColor
+			self.netBox.SetText('Network: %s' % GlobalPico()['wlan_ssid'], backclr=u)
+			self.netBox.Draw()
+			self.netBox.SetText('', backclr=self.BackColor)
+		else :
+			wlan = WLAN(STA_IF)
+			isup = 'up' if wlan.active() else 'dn'
+			ip = wlan.ifconfig()[0] # current ip address
+			self.netBox.DrawText('Network: %s at %s : %s' % (isup, GlobalPico()['wlan_ssid'], ip ))
+
 	def DrawStatics(self) :
 		''' draw the labels '''
 		# self.titleBox.SetText(just = None)
 		self.titleBox.Draw()
 		self.UnitBox.DrawText(self.UnitStr)
-		self.netBox.DrawText('Network: %s' % str(WLAN(STA_IF)))
 		self.DrawValues(100, 200.123, 432.789)
 		self.WhichAxisLabel.Draw()
 		self.TicSizeLabel.Draw()
@@ -157,6 +172,7 @@ class JogScreen(pp_screen) :
 		self.DrawTicsize()
 		self.DrawDesired()
 		self.DrawDevice()
+		self.DrawNetwork()
 
 	def Setup(self) :
 		''' draw the base screen and set up variables '''
@@ -196,6 +212,7 @@ class JogScreen(pp_screen) :
 		self.titleBox.SetText('Jog Screen', just=IoBox.JUST_CENTER)
 		
 		self.netBox = self.MakeIoBox(medFont, self.indent, self.yNet)
+		self.netBox.Resize(0, self.bigBox.font.height)
 
 		xoffset = self.indent
 		self.XAxisBox = self.MakeIoBox(bigFont, xoffset, self.yX)
@@ -407,6 +424,14 @@ class JogScreen(pp_screen) :
 					self.lastDial1Pos = 0
 					self.desiredMove = None
 					self.DrawDesired()
+			elif self.dialEdit == 'N' :	# device
+				devices = GlobalPico()['wlan_ssids']
+				p1 = po % len(devices)
+				if devices[p1] != GlobalPico()['wlan_ssid'] :
+					GlobalPico()['wlan_ssid'] = devices[p1]
+					self.DrawNetwork()
+
+
 			elif self.dialEdit == 'B' : # brightness
 				p1 = min(20, max(0, po))
 				if p1 != po :
@@ -433,19 +458,31 @@ class JogScreen(pp_screen) :
 			return
 		u = ticks_ms()
 		tch = GlobalLcd().touch_get(True) # touchdown, downx, downy, touchx, touchy
-		if ticks_diff(u, self.WhenTouch) > 500 :
+		if ticks_diff(u, self.WhenTouch) > 1500 :
 			if tch[1] != self.LastTouch[1] or tch[2] != self.LastTouch[2] :
 				# moved
 				self.WhenTouch = ticks_ms()
 				if self.dialEdit == 'B' :
+					self.DrawNetwork()
 					self.dialEdit = 'T'
 					self.Dial2.Position = GlobalPico()['devices'].index(GlobalPico()['device'])
 				elif self.dialEdit == 'T' :
 					self.dialEdit = 'D'
 					self.Dial2.Position = self.ticValue
 				elif self.dialEdit == 'D' :
+					self.dialEdit = 'N'
+					self.lastSsid = GlobalPico()['wlan_ssid']
+					self.Dial2.Position = 0
+					self.DrawNetwork()
+				elif self.dialEdit == 'N' :
+					# if it was network, set the network if necessary
+					ssid =  GlobalPico()['wlan_ssid']
+					if self.lastSsid != ssid :
+						doConnect(ssid)
+						self.lastSsid = ssid
 					self.dialEdit = 'B'
 					self.Dial2.Position = self.Brightness
+					self.DrawNetwork()
 				self.didCheck = True
 				self.LastTouch = tch
 				self.DrawTicsize()

@@ -62,8 +62,9 @@ class PicoPendant(dict):
 	def _SetDefault(self) :
 		self['ap_ssid'] = 'PicoPendant'
 		self['ap_password'] = 'pendant1234'
+		self['wlan_ssids'] = [secrets['wlan_ssid']]
+		self['wlan_passwords'] = [secrets['wlan_password']]
 		self['wlan_ssid'] = secrets['wlan_ssid']
-		self['wlan_password'] = secrets['wlan_password']
 		self['units'] = 'm' # 'i' or 'm'
 		# hokie but useful
 		self['devices'] = ['CNC', 'Mill', 'Printer', 'Null']  # all

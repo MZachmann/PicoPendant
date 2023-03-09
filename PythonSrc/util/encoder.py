@@ -32,6 +32,7 @@ class EncoderSw :
 	def __init__(self, whichPort, usePullups = False) :
 		PinSets = [[4,3,2],[21,7,6],[18,19,20]] # port pins
 		self._Lastvalue = 0
+		self._WhichPort = whichPort
 		# the usual encoder card has pullups on it but doesn't really need them or power
 		# it's just a wiper switch
 		whom = PinSets[whichPort]
@@ -47,6 +48,7 @@ class EncoderSw :
 		self._ClkPin.irq(trigger=Pin.IRQ_RISING|Pin.IRQ_FALLING, handler=self.handle_interrupt)
 		self._SwPin.irq(trigger=Pin.IRQ_FALLING, handler=self.handle_switch)
 		self._Position = 0		# initial position at start
+		self._PosOffset = 0		# machine vs local coords...
 		self._Clicked = False
 	
 	def handle_interrupt(self, pin):
@@ -83,10 +85,8 @@ class EncoderSw :
 	# this is quadrature so ignore half-steps since they have no physical stop
 	@property
 	def Position(self) :
-		return int(self._Position/2)
+		return int((self._Position - self._PosOffset)/2)
 
 	@Position.setter
 	def Position(self, pos) :
-		self._Position = 2*pos
-
-
+		self._PosOffset = self._Position - 2*pos

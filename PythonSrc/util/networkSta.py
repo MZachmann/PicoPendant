@@ -20,7 +20,12 @@ def StaStart() :
 	wlan.active(True)
 	# get ssid, password from global settings
 	gls = GlobalPico()
-	wlan.connect(gls['wlan_ssid'], gls['wlan_password'])
+	ssid = gls['wlan_ssid']
+	idx = gls['wlan_ssids'].index(ssid)
+	if idx >= 0 :
+		wlan.connect(gls.wlan_ssid, gls['wlan_passwords'][idx])
+	else :
+		print("no wifi connected, ssid not found in list")
 
 def StaStop() :
 	''' turn off the Access Point'''
