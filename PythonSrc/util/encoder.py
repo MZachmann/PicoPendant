@@ -23,6 +23,7 @@
 #     Position - integer + == clockwise pips, settable, interrupt driven
 
 from machine import Pin
+from time import ticks_add, ticks_diff, ticks_ms
 
 class EncoderSw :
 	'''This class supports a 5-pin arduino Encoder
@@ -33,6 +34,7 @@ class EncoderSw :
 		PinSets = [[4,3,2],[21,7,6],[18,19,20]] # port pins
 		self._Lastvalue = 0
 		self._WhichPort = whichPort
+		self._LastClicked = ticks_ms()
 		# the usual encoder card has pullups on it but doesn't really need them or power
 		# it's just a wiper switch
 		whom = PinSets[whichPort]
@@ -55,9 +57,9 @@ class EncoderSw :
 		'''The interrupt handler for the Clock line. 
 		increment if clock != data else decrement'''
 		v = self._ClkPin.value()
-		u = self._DtPin.value()
 		# if we lost a step, this won't be right so just ignore the click
 		if v != self._Lastvalue:
+			u = self._DtPin.value()
 			delta = (1 if (v != u) else -1)
 			self._Position = delta + self._Position
 			self._Lastvalue = v
@@ -66,7 +68,9 @@ class EncoderSw :
 	def handle_switch(self, pin):
 		'''The interrupt handler for the Clock line. 
 		increment if clock != data else decrement'''
-		self._Clicked = True
+		if ticks_diff(ticks_ms(), self._LastClicked) > 0 :
+			self._Clicked = True
+			self._LastClicked = ticks_add(ticks_ms(), 700)
 
 	# ButtonClicked = true if button was clicked since last check
 	@property

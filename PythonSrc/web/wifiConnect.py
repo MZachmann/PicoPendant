@@ -7,24 +7,27 @@ def doConnect(ssid) :
 	wlan = WLAN(STA_IF)
 	try :
 		if wlan.active() :
+			print("disconnecting")
 			wlan.disconnect()
 			wlan.active(False)
-			sleep_ms(150)
-			wlan.active(True)
 			sleep_ms(150)
 	except Exception as e :
 		print(str(e))
 
-	gls = GlobalPico()
-	idx = gls['wlan_ssids'].index(ssid)
-	if idx >= 0 :
-		pw = gls['wlan_passwords'][idx]
-		wlan.connect(ssid, pw)
-		gls['wlan_ssid'] = ssid
-		print('conn %s %s' % (ssid,pw))
-		sleep_ms(1000)
-	else :
-		print('ssid %s not found in list', ssid)
+	try :
+		wlan.active(True)
+		gls = GlobalPico()
+		idx = gls['wlan_ssids'].index(ssid)
+		if idx >= 0 :
+			pw = gls['wlan_passwords'][idx]
+			print('conn %s %s' % (ssid,pw))
+			wlan.connect(ssid, pw)
+			gls['wlan_ssid'] = ssid
+			sleep_ms(1000)
+		else :
+			print('ssid %s not found in list', ssid)
+	except Exception as e :
+		print(str(e))
 	pw = None
 	ssid = None
 	# this could never connect, so don't check

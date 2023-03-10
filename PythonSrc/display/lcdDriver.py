@@ -145,7 +145,7 @@ class LCD_3inch5():
         xMax = int(xMax)
         yMin = int(yMin)
         yMax = int(yMax)
-        state = disable_irq() # given touch code issues this is probably necessary
+        # state = disable_irq() # given touch code issues this is probably necessary
         tos = [xMin>>8, xMin&0xff, xMax>>8, xMax&0xff]
         self._writeCommand(0x2A, bytearray(tos)) # col address
         tos = [yMin>>8, yMin&0xff, yMax>>8, yMax&0xff]
@@ -156,7 +156,7 @@ class LCD_3inch5():
         self.cs(0)
         self.spi.write(self._MyFrame)
         self.cs(1)
-        enable_irq(state)
+        # enable_irq(state)
 
     def set_brightness(self, duty):
         ''' change the backlight brightness by altering a PWM pin '''
