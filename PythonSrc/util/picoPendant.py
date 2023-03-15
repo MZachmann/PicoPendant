@@ -16,7 +16,7 @@
 import ujson as json
 from secrets_file import secrets
 from fonts.fontReader import ParseFontFile
-from display.colorSet import DarkTheme as Theme
+from display.colorSet import LightTheme, DarkTheme
 from fonts.fontCache import FontCache
 import gc
 
@@ -40,7 +40,7 @@ class PicoObjects(dict):
 		#self['fontList'] = ['fontLucida40', 'fontLucida28', 'fontArial28', 'fontLucida22','fontArial22','fontArial11']
 		self['fontList'] = ['fontLucida40', 'fontArial28', 'fontArial22']
 		self.LoadFontFiles()
-		self['theme'] = Theme
+		self['theme'] = DarkTheme if GlobalPico()['theme'] == 'dark' else LightTheme
 		# all the really big stuff gets allocated very early...
 		try :
 			self['dispBuffer'] = bytearray(480*32*2)
@@ -74,7 +74,7 @@ class PicoPendant(dict):
 		self['Null'] = 	{ 'ip' : '0.0.0.0', 'sbc' : 'N', 'pwd' : '' } # dummy to not affect anything
 
 		self['device'] = 'CNC'	# current
-
+		self['theme'] = 'dark'
 
 	def Initialize(self) :
 		'''setup the default settings and then load overrides and other settings'''

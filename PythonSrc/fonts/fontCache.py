@@ -49,7 +49,7 @@ class FontCacher :
 			# print('size is %d x %d' % (fsize, ff.font.height))
 			buf = FrameBuffer( self.buffers[i], self.xsize, self.ysize, RGB565)
 			buf.fill(gls['theme']['background'])
-			ff.DrawChar((i.encode('UTF-8'))[0], 0, 0, 0xffff, buffer=buf)
+			ff.DrawChar((i.encode('UTF-8'))[0], 0, 0, gls['theme']['foreground'], buffer=buf)
 		del ff
 		gc.collect()
 		# if we delete the lucida40 font now we save 12K ram...

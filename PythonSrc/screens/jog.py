@@ -204,10 +204,10 @@ class JogScreen(pp_screen) :
 		self.bigWidth = self.bigBox.drawer.GetStringWidth('0') # width of a big Zero
 
 		self.xUserInfo = self.indent
-		self.yAxisInfo = self.yZ + self.bigBox.font.height + self.lspace*2
-		self.ySpeedInfo = self.yAxisInfo + self.medBox.font.height + self.lspace*2
-		self.yDesired = self.ySpeedInfo + self.medBox.font.height + self.lspace*2
-		self.yDeviceInfo = self.yDesired + self.medBox.font.height + self.lspace*2
+		self.yDesired = self.yZ + self.bigBox.font.height + self.lspace*2
+		self.ySpeedInfo = self.yDesired + self.medBox.font.height + self.lspace*2
+		self.yAxisInfo = self.ySpeedInfo + self.medBox.font.height + self.lspace*2
+		self.yDeviceInfo = self.yAxisInfo + self.medBox.font.height + self.lspace*2
 		self.yNet = self.yDeviceInfo + self.medBox.font.height + self.lspace
 		self.xUserData = self.xUserInfo + self.medBox.drawer.GetStringWidth('Tic Size') + 30
 
@@ -322,13 +322,12 @@ class JogScreen(pp_screen) :
 
 	async def _statusRequest(self) :
 		''' send and parse the result of an RRF status request'''
-		if self.isParsing :
-			return None
+		if self.isParsing or self.isGoing:
+			return
 		self.isParsing = True
 		print('request rr_status')
 		try :
 			u = None
-			uText = ''
 			s = self.GetDeviceIp()
 			if s is not None :
 				u = await arequest.get(s + '/rr_status')
@@ -336,7 +335,7 @@ class JogScreen(pp_screen) :
 					# u.close() # required for mem cleanup ?
 					self.UpdatePosition(u.content)
 		except Exception as e:
-			print('pst: ' + s + '  ' + str(e) + uText)
+			print('pst: ' + s + '  ' + (' ' if u is None else u.text))
 		finally :
 			self.isParsing = False
 
@@ -348,11 +347,14 @@ class JogScreen(pp_screen) :
 		''' send and parse the result of an RRF status request'''
 		if self.isGoing :
 			return None
-		self.isGoing = True
+		u = ticks_ms()
+		self.isGoing = True # stop further parses from happening
+		while self.isParsing and ticks_diff(ticks_ms(), u) < 6000 :
+			asyncio.sleep_ms(200)
 		# move in mm?
-		gcode = '/rr_gcode?gcode=G0' + axis + str(position)
-		print('gcode = %s' % gcode)
 		try :
+			gcode = '/rr_gcode?gcode=G0' + axis + str(position)
+			print('gcode = %s' % gcode)
 			s = self.GetDeviceIp()
 			if s is not None :
 				u = await arequest.get(s + gcode)
@@ -531,8 +533,8 @@ class JogScreen(pp_screen) :
 		try :
 			while self.doRun :
 				# on timer request send to web
-				if self.desiredMove != None and ticks_diff(self.moveTime, ticks_ms()) < 0 :
-					await asyncio.sleep(0)
+				await asyncio.sleep(0)
+				if self.desiredMove != None and not self.isParsing and not self.isGoing and ticks_diff(self.moveTime, ticks_ms()) < 0 :
 					if self.desiredMove != self.currentPos : # do a move
 						self._sendGoRequest(self.whichAxis, self.desiredMove) # in mm
 						self.desiredMove = None # don't keep trying...
@@ -541,8 +543,8 @@ class JogScreen(pp_screen) :
 						self.moveTime = ticks_add(u, 300)
 
 				# only check position if we're in usual move mode
+				await asyncio.sleep(0)
 				if self.dialEdit=='T' and ticks_diff(self.checkTime, ticks_ms()) < 0 :
-						await asyncio.sleep(0)
 						self._parseStatus()		# update x,y,z
 						if self.desiredMove is None :
 							self.currentPos = self.Locn[self.AxisIdx]

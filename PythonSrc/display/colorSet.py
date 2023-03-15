@@ -2,15 +2,15 @@
 
 
 DarkTheme = {
-	'background' : 0x04,
+	'background' : 0x021,
 	'foreground' : 0x7fff,
 	'highlight' : 0x0088
 	}
 
 LightTheme = {
-	'background' : 0x07,
-	'foreground' : 0x7fff,
-	'highlight' : 0x1ff0
+	'background' : 0xffff,
+	'foreground' : 0x021,
+	'highlight' : 0x01f
 	}
 
 SolidClr = { 
