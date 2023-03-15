@@ -66,14 +66,15 @@ class PicoPendant(dict):
 		self['wlan_passwords'] = [secrets['wlan_password']]
 		self['wlan_ssid'] = secrets['wlan_ssid']
 		self['units'] = 'm' # 'i' or 'm'
-		# hokie but useful
+
 		self['devices'] = ['CNC', 'Mill', 'Printer', 'Null']  # all
-		self['device'] = 'CNC'	# current
-		self['token'] = ''
 		self['CNC'] =		{ 'ip' : 'http://192.168.0.58', 'sbc' : 'N', 'pwd' : '' }
 		self['Mill'] = 		{ 'ip' : 'http://192.168.0.53', 'sbc' : 'N', 'pwd' : '' }
 		self['Printer'] = 	{ 'ip' : 'http://192.168.0.57', 'sbc' : 'N', 'pwd' : '' }
 		self['Null'] = 	{ 'ip' : '0.0.0.0', 'sbc' : 'N', 'pwd' : '' } # dummy to not affect anything
+
+		self['device'] = 'CNC'	# current
+
 
 	def Initialize(self) :
 		'''setup the default settings and then load overrides and other settings'''
@@ -99,9 +100,14 @@ class PicoPendant(dict):
 				data = json.load(o1)
 			 # copy to self
 			if data != None:
+				# set up devices because we allow self[device]
+				tx = 'devices'
+				if tx in data.keys() :
+					self[tx] = data[tx]
+				# now do the rest
 				for i in data.keys():
 					# don't copy if we don't have this property any more
-					if i in self.keys() :
+					if i in self.keys() or i in self[tx] :
 						self[i] = data[i]
 					else :
 						print('skip load : ' + i)

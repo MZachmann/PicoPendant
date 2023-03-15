@@ -176,6 +176,7 @@ class LCD_3inch5():
             self.touchDown = False
         return x
 
+    # we get an interrupt on move and on down and up
     def handle_touch(self, pin) :
         if self.inTouch :
             return
@@ -183,7 +184,8 @@ class LCD_3inch5():
         xPoint = 0
         yPoint = 0
         if self.irq.value() == 0:
-            self.downX = self.downX + 1
+            self.downX = self.downX + 1 # so change downx because what else?
+            self.touchDown = True
             # numAve = 3
             # # slow down the spi rate for the flash here
             # # ----------------------------------------------------------------

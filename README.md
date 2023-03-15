@@ -36,5 +36,13 @@ You may need to install a driver to have the Pico show up as a serial port. See 
 * To synchronize all files to the pico:
   * Mouse over the USB Serial Device line in the pymakr extension and pick the arrow-to-cloud icon (yeah bad UI)
 
+### config.json
+The code sets up default globals then reads config.json to override them. It's simple to manually edit your config.json and set up networking variables. Put config.json in the root with main.py to have it loaded at startup. Interrupt (Ctrl-C) the running jog.py and use
+
+	from util import picoPendant
+	picoPendant.GlobalPico().Save()
+
+to save current settings. Clean out the stuff you don't want changed, then edit the stuff you want to override.
+
 ## SBC Support
 The SBC version of the Duet3d controller takes quite a different WiFi syntax and is not yet supported.

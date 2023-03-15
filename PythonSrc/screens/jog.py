@@ -19,9 +19,13 @@ import gc
 
 def RunJogger() :
 	''' run the thing. if you do x = RunJogger() then you can use x.Loop() to rerun it '''
-	x=JogScreen()
-	x.Setup()
-	asyncio.run( x.Loop())
+	didi = False
+	try :
+		x=JogScreen()
+		x.Setup()
+		asyncio.run( x.Loop())
+	except Exception as e:
+		print('failure ' + str(e))
 	return x
 
 class JogScreen(pp_screen) :
@@ -42,6 +46,7 @@ class JogScreen(pp_screen) :
 		self.showMachine = False
 		self.Brightness = 70
 		self.LastTouch = [0,0,0,0,0]
+		self.isTouchDown = False
 		self.WhenTouch = 0
 		self.lastDial1Pos = 0
 		self.lastDial2Pos = 0
@@ -398,12 +403,9 @@ class JogScreen(pp_screen) :
 		self.lastDial1Pos = self.Dial1.Position
 
 	def HandleDial2(self) :
-		# disable on button
-		u = self.Dial2.ButtonClicked
-		# swap on click only
-		if u :
+		# swap on click
+		if  self.Dial2.ButtonClicked :
 			if self.dialEdit == 'T' :
-				# if self.Dial2Enabled :
 				self.Dial2Enabled = not self.Dial2Enabled
 				if self.Dial2Enabled :
 					self.Dial2.Position = self.ticValue
@@ -413,6 +415,7 @@ class JogScreen(pp_screen) :
 
 		po = self.Dial2.Position
 		if po != self.lastDial2Pos :
+			self.lastDial2Pos = po
 			if self.dialEdit == 'T' :	# tic size
 				if not self.Dial2Enabled :
 					return
@@ -448,8 +451,6 @@ class JogScreen(pp_screen) :
 				if devices[p1] != GlobalPico()['wlan_ssid'] :
 					GlobalPico()['wlan_ssid'] = devices[p1]
 					self.DrawNetwork()
-
-
 			elif self.dialEdit == 'B' : # brightness
 				p1 = min(20, max(0, po))
 				if p1 != po :
@@ -457,7 +458,6 @@ class JogScreen(pp_screen) :
 				if self.Brightness != p1 :
 					GlobalLcd().set_brightness(5 * p1)
 					self.Brightness = p1
-		self.lastDial2Pos = po
 
 
 	def HandleSwitch(self) :
@@ -475,22 +475,31 @@ class JogScreen(pp_screen) :
 		if not self.Dial2Enabled :
 			return
 		u = ticks_ms()
+		tdif = ticks_diff(u, self.WhenTouch)
 		tch = GlobalLcd().touch_get(True) # touchdown, downx, downy, touchx, touchy
-		if ticks_diff(u, self.WhenTouch) > 1500 :
-			if tch[1] != self.LastTouch[1] or tch[2] != self.LastTouch[2] :
+		istouch = tch[1] != self.LastTouch[1] # activity
+		if self.isTouchDown and not istouch : # released
+			self.isTouchDown = False
+		if istouch :
+			self.LastTouch = tch
+			self.WhenTouch = ticks_ms()
+		if istouch and not self.isTouchDown and tdif > 500 :
+				self.isTouchDown = True
 				# moved
-				self.WhenTouch = ticks_ms()
 				if self.dialEdit == 'B' :
 					self.DrawNetwork()
 					self.dialEdit = 'T'
-					self.Dial2.Position = GlobalPico()['devices'].index(GlobalPico()['device'])
+					self.Dial2.Position = self.ticValue
+					self.lastDial2Pos = self.ticValue
 				elif self.dialEdit == 'T' :
 					self.dialEdit = 'D'
-					self.Dial2.Position = self.ticValue
+					self.Dial2.Position = GlobalPico()['devices'].index(GlobalPico()['device'])
+					self.lastDial2Pos = self.Dial2.Position
 				elif self.dialEdit == 'D' :
 					self.dialEdit = 'N'
 					self.lastSsid = GlobalPico()['wlan_ssid']
 					self.Dial2.Position = 0
+					self.lastDial2Pos = self.Dial2.Position
 					self.DrawNetwork()
 				elif self.dialEdit == 'N' :
 					# if it was network, set the network if necessary
@@ -500,7 +509,8 @@ class JogScreen(pp_screen) :
 						self.lastSsid = ssid
 					self.dialEdit = 'B'
 					self.Dial2.Position = self.Brightness
-					self.DrawNetwork()
+					self.lastDial2Pos = self.Dial2.Position
+					self.DrawNetwork() # draw this when dialedit is B
 				self.didCheck = True
 				self.LastTouch = tch
 				self.DrawTicsize()
@@ -518,52 +528,56 @@ class JogScreen(pp_screen) :
 		self.doRun = True
 
 		''' do a control loop responding to stuff '''
-		while self.doRun :
-			# on timer request send to web
-			if self.desiredMove != None and ticks_diff(self.moveTime, ticks_ms()) < 0 :
-				await asyncio.sleep(0)
-				if self.desiredMove != self.currentPos : # do a move
-					self._sendGoRequest(self.whichAxis, self.desiredMove) # in mm
-					self.desiredMove = None # don't keep trying...
-					u = ticks_ms()
-					self.checkTime = ticks_add(u, 1000)
-					self.moveTime = ticks_add(u, 300)
-
-			# only check position if we're in usual move mode
-			if self.dialEdit=='T' and ticks_diff(self.checkTime, ticks_ms()) < 0 :
+		try :
+			while self.doRun :
+				# on timer request send to web
+				if self.desiredMove != None and ticks_diff(self.moveTime, ticks_ms()) < 0 :
 					await asyncio.sleep(0)
-					self._parseStatus()		# update x,y,z
-					if self.desiredMove is None :
-						self.currentPos = self.Locn[self.AxisIdx]
-						self.Dial1.Position = 0
-					self.DrawDesired()
-					u = ticks_ms()
-					self.checkTime = ticks_add(u, 1000)
-					self.moveTime = ticks_add(u, 200) # can move now
+					if self.desiredMove != self.currentPos : # do a move
+						self._sendGoRequest(self.whichAxis, self.desiredMove) # in mm
+						self.desiredMove = None # don't keep trying...
+						u = ticks_ms()
+						self.checkTime = ticks_add(u, 1000)
+						self.moveTime = ticks_add(u, 300)
 
-			self.HandleDial2()	# dial2 is the tic size and device
-			await asyncio.sleep(0)
+				# only check position if we're in usual move mode
+				if self.dialEdit=='T' and ticks_diff(self.checkTime, ticks_ms()) < 0 :
+						await asyncio.sleep(0)
+						self._parseStatus()		# update x,y,z
+						if self.desiredMove is None :
+							self.currentPos = self.Locn[self.AxisIdx]
+							self.Dial1.Position = 0
+						self.DrawDesired()
+						u = ticks_ms()
+						self.checkTime = ticks_add(u, 1000)
+						self.moveTime = ticks_add(u, 200) # can move now
 
-			self.HandleDial1()	# dial 1 is the location
-			await asyncio.sleep(0)
+				self.HandleDial2()	# dial2 is the tic size and device
+				await asyncio.sleep(0)
 
-			self.HandleSwitch()	# switch for axis
-			await asyncio.sleep(0)
+				self.HandleDial1()	# dial 1 is the location
+				await asyncio.sleep(0)
 
-			self.HandleTouch() # check the touchscreen
-			await asyncio.sleep(0)
+				self.HandleSwitch()	# switch for axis
+				await asyncio.sleep(0)
 
-			# if something changed, don't send to web for a bit
-			if self.didCheck :
-				self.checkTime = ticks_add(ticks_ms(),1000)
-				self.didCheck = False
-			await asyncio.sleep(0)
+				self.HandleTouch() # check the touchscreen
+				await asyncio.sleep(0)
 
-			u = self.Dial1.ButtonState
-			await asyncio.sleep(0)
-			if u and u == self.Dial2.ButtonState :
-				self.doRun = False	# quit this
-			await asyncio.sleep(0)
+				# if something changed, don't send to web for a bit
+				if self.didCheck :
+					self.checkTime = ticks_add(ticks_ms(),1000)
+					self.didCheck = False
+				await asyncio.sleep(0)
+
+				u = self.Dial1.ButtonState
+				await asyncio.sleep(0)
+				if u and u == self.Dial2.ButtonState :
+					self.doRun = False	# quit this
+				await asyncio.sleep(0)
+		except Exception as e:
+			print("Fail: " + str(e))
+		asyncio.new_event_loop()  # Clear retained state
 
 	def CleanUp(self) :
 		''' do any cleanup '''

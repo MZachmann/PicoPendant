@@ -39,13 +39,13 @@ The configuration loader reads config.json and updates any fields found in confi
 
 ## Known Concerns
 * Touchscreen<br>
-Currently the touchscreen location can not be read because this requires a much slower SPI speed and trying to temporarily switch the SPI speed to accomodate the touch location reader causes WiFi, which also uses SPI, to start failing permanently. So for now the touch location is not used. There is an existing issue in the MicroPython repository asking for per-device SPI speeds.
+Currently the touchscreen location can not be read because this requires a much slower SPI speed and trying to temporarily switch the SPI speed to accomodate the touch location reader causes WiFi, which also uses SPI, to start failing permanently. So for now the touch location is not used. 
 * Performance<br>
-Due to the unwillingness to keep trying to use thread or asynch there are some performance concerns where WiFi waiting for responses causes GUI lags. This is solvable but not yet worth the trouble until other things are solid.
+At this point I've switched to asyncio for the networking since threads were never going to work afaik. This works remarkably well so just tweaky timing things now.
 * Rotary Encoders<br>
-The current switch-based encoders are pretty weak (coarse and occasional step-loss) but very cheap - the usual tradeoff. Using a real optical encoder for the movement rotary would help and I may switch to that at some point since I have one lying around.
+The current switch-based encoders are pretty weak (coarse and rare step-loss) but very cheap - the usual tradeoff. Using a real optical encoder for the movement rotary would help and I may switch to that at some point since I have one lying around.
 * MicroPython<br>
-Both MicroPython and CircuitPython are still in beta for the Raspberry Pi Pico W and it shows. CircuitPython is unstable, has no thread support, and the wifi support is very bad so imho unsuitable.  MicroPython has been stable and usable but I haven't yet gotten thread to work well - which is pretty necessary.
+Both MicroPython and CircuitPython are still in beta for the Raspberry Pi Pico W and it shows. CircuitPython is unstable, has no thread support, and the wifi support is very bad so imho unsuitable.  MicroPython has been stable and usable but I haven't yet gotten thread to work with networks.
 * Random jogging<br>
 To avoid any possible jogging while running a job, the code supports setting device to null (ip = 0.0.0.0) which will not send wifi requests. Also, wifi is disabled unless the middle encoder is in adjust-tic-size mode (enabled or disabled). 
 
@@ -85,9 +85,7 @@ The board has 3 encoder ports, 3 ladder sw or general A/D ports with 10K divider
 ### web
 
 * wifiConnect is the wifi connection method
-* webQueue is a serial Wifi queue but currently unused. It was desiged for threading or async.
-* ureq is async urequests (for debug)
-* ureqorig is urequests with additional diagnostics (for debug)
+* arequest is async urequests
 
 ### root files
 
