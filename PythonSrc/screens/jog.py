@@ -4,7 +4,7 @@ from network import WLAN, STA_IF
 import ujson as json
 # import urequests
 # import web.ureqorig as urequests
-from web.arequest import request
+import web.arequest as arequest
 from utime import ticks_ms, ticks_diff, ticks_add
 from display.colorSet import SolidClr
 from display.ioBox import IoBox
@@ -305,14 +305,17 @@ class JogScreen(pp_screen) :
 			return s
 
 	def UpdatePosition(self, data) :
-		status = json.loads(data)
-		self.Locn = status['pos']
-		self.Mach = status['machine']
-		posn = self.Locn
-		self.DrawValues(posn[0], posn[1], posn[2])
-		if self.showMachine :
-			posn = self.Mach
-			self.DrawMachine(posn[0], posn[1], posn[2])
+		try :
+			status = json.loads(data)
+			self.Locn = status['pos']
+			self.Mach = status['machine']
+			posn = self.Locn
+			self.DrawValues(posn[0], posn[1], posn[2])
+			if self.showMachine :
+				posn = self.Mach
+				self.DrawMachine(posn[0], posn[1], posn[2])
+		except Exception as e:
+			print('update: ' + str(e))
 
 	async def _statusRequest(self) :
 		''' send and parse the result of an RRF status request'''
@@ -325,14 +328,10 @@ class JogScreen(pp_screen) :
 			uText = ''
 			s = self.GetDeviceIp()
 			if s is not None :
-				# u = urequests.get(s + '/rr_status')
-				s_req = {"url": s + '/rr_status'}
-				u = await request(s_req)
+				u = await arequest.get(s + '/rr_status')
 				if u is not None :
-					uText = u['body'] # u.text
-					# print('uText=' + str(uText))
 					# u.close() # required for mem cleanup ?
-					self.UpdatePosition(uText)
+					self.UpdatePosition(u.content)
 		except Exception as e:
 			print('pst: ' + s + '  ' + str(e) + uText)
 		finally :
@@ -349,21 +348,14 @@ class JogScreen(pp_screen) :
 		self.isGoing = True
 		# move in mm?
 		gcode = '/rr_gcode?gcode=G0' + axis + str(position)
-		# print('gcode = %s' % gcode)
+		print('gcode = %s' % gcode)
 		try :
 			s = self.GetDeviceIp()
 			if s is not None :
-				# await WebQ().AddPacket(gcode, 0)
-				# u = await WebQ().GetResponse(1500) # wait for ok ?
-				# u = urequests.get(s + gcode)
-				s_req = {
-					"url": s + gcode,
-					"headers": {
-						"Accept": "application/json" }}
-				u = await request(s_req)
-				if u is not None :
-					self.UpdatePosition(u['body'])
-					# u.close() # required for mem cleanup
+				u = await arequest.get(s + gcode)
+				#if u is not None :
+				#	self.UpdatePosition(u.content) # ['body'])
+				#	u.close() # required for mem cleanup
 		except Exception as e:
 			print('goto: ' + str(e))
 		finally :
