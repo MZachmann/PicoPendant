@@ -2,8 +2,9 @@
 # --------------------------
 from network import WLAN, STA_IF
 import ujson as json
-import urequests
+# import urequests
 # import web.ureqorig as urequests
+from web.arequest import request
 from utime import ticks_ms, ticks_diff, ticks_add
 from display.colorSet import SolidClr
 from display.ioBox import IoBox
@@ -11,6 +12,7 @@ from screens.screen import pp_screen
 from util.picoPendant import GlobalPico
 from display.lcdDriver import GlobalLcd
 from web.wifiConnect import doConnect
+import uasyncio as asyncio
 import gc
 
 # show X,Y,Z position, let an encoder move left/right
@@ -21,7 +23,7 @@ def RunJogger() :
 	''' run the thing. if you do x = RunJogger() then you can use x.Loop() to rerun it '''
 	x=JogScreen()
 	x.Setup()
-	x.Loop()
+	asyncio.run( x.Loop())
 	return x
 
 class JogScreen(pp_screen) :
@@ -183,6 +185,8 @@ class JogScreen(pp_screen) :
 		self.ticValue = 0
 		self.desiredMove = None
 		self.checkTime = ticks_ms()
+		self.isParsing = False
+		self.isGoing = False
 		bigFont = 'fontLucida40'
 		medFont = 'fontArial22'
 
@@ -310,40 +314,64 @@ class JogScreen(pp_screen) :
 			posn = self.Mach
 			self.DrawMachine(posn[0], posn[1], posn[2])
 
-	def _parseStatus(self) :
+	async def _statusRequest(self) :
 		''' send and parse the result of an RRF status request'''
+		if self.isParsing :
+			return None
+		self.isParsing = True
 		print('request rr_status')
 		try :
 			u = None
 			uText = ''
 			s = self.GetDeviceIp()
 			if s is not None :
-				u = urequests.get(s + '/rr_status')
-				# await WebQ().AddPacket('rr_status', 0)
-				# u = await WebQ().GetResponse(1500)
+				# u = urequests.get(s + '/rr_status')
+				s_req = {"url": s + '/rr_status'}
+				u = await request(s_req)
 				if u is not None :
-					uText = u.text
-					u.close() # required for mem cleanup
+					uText = u['body'] # u.text
+					# print('uText=' + str(uText))
+					# u.close() # required for mem cleanup ?
 					self.UpdatePosition(uText)
 		except Exception as e:
 			print('pst: ' + s + '  ' + str(e) + uText)
+		finally :
+			self.isParsing = False
 
-	def _SendGoTo(self, axis, position) :
+	def _parseStatus(self) :
+		 task = asyncio.create_task(self._statusRequest())
+		 return task
+
+	async def _SendGoTo(self, axis, position) :
 		''' send and parse the result of an RRF status request'''
+		if self.isGoing :
+			return None
+		self.isGoing = True
 		# move in mm?
 		gcode = '/rr_gcode?gcode=G0' + axis + str(position)
-		print('gcode = %s' % gcode)
+		# print('gcode = %s' % gcode)
 		try :
 			s = self.GetDeviceIp()
 			if s is not None :
 				# await WebQ().AddPacket(gcode, 0)
 				# u = await WebQ().GetResponse(1500) # wait for ok ?
-				u = urequests.get(s + gcode)
+				# u = urequests.get(s + gcode)
+				s_req = {
+					"url": s + gcode,
+					"headers": {
+						"Accept": "application/json" }}
+				u = await request(s_req)
 				if u is not None :
-					self.UpdatePosition(u.text)
-					u.close() # required for mem cleanup
+					self.UpdatePosition(u['body'])
+					# u.close() # required for mem cleanup
 		except Exception as e:
 			print('goto: ' + str(e))
+		finally :
+			self.isGoing = False
+
+	def _sendGoRequest(self, axis, position) :
+		 task = asyncio.create_task(self._SendGoTo(axis, position))
+		 return task
 
 
 	def HandleDial1(self) :
@@ -490,7 +518,7 @@ class JogScreen(pp_screen) :
 		else :
 			self.LastTouch = tch
 
-	def Loop(self) :
+	async def Loop(self) :
 		self.Dial1.Position = 0
 		self.Dial2.Position = 0
 		self.didCheck = False
@@ -503,8 +531,9 @@ class JogScreen(pp_screen) :
 		while self.doRun :
 			# on timer request send to web
 			if self.desiredMove != None and ticks_diff(self.moveTime, ticks_ms()) < 0 :
+				await asyncio.sleep(0)
 				if self.desiredMove != self.currentPos : # do a move
-					self._SendGoTo(self.whichAxis, self.desiredMove) # in mm
+					self._sendGoRequest(self.whichAxis, self.desiredMove) # in mm
 					self.desiredMove = None # don't keep trying...
 					u = ticks_ms()
 					self.checkTime = ticks_add(u, 1000)
@@ -512,6 +541,7 @@ class JogScreen(pp_screen) :
 
 			# only check position if we're in usual move mode
 			if self.dialEdit=='T' and ticks_diff(self.checkTime, ticks_ms()) < 0 :
+					await asyncio.sleep(0)
 					self._parseStatus()		# update x,y,z
 					if self.desiredMove is None :
 						self.currentPos = self.Locn[self.AxisIdx]
@@ -522,21 +552,28 @@ class JogScreen(pp_screen) :
 					self.moveTime = ticks_add(u, 200) # can move now
 
 			self.HandleDial2()	# dial2 is the tic size and device
+			await asyncio.sleep(0)
 
 			self.HandleDial1()	# dial 1 is the location
+			await asyncio.sleep(0)
 
 			self.HandleSwitch()	# switch for axis
+			await asyncio.sleep(0)
 
 			self.HandleTouch() # check the touchscreen
+			await asyncio.sleep(0)
 
 			# if something changed, don't send to web for a bit
 			if self.didCheck :
 				self.checkTime = ticks_add(ticks_ms(),1000)
 				self.didCheck = False
+			await asyncio.sleep(0)
 
 			u = self.Dial1.ButtonState
+			await asyncio.sleep(0)
 			if u and u == self.Dial2.ButtonState :
 				self.doRun = False	# quit this
+			await asyncio.sleep(0)
 
 	def CleanUp(self) :
 		''' do any cleanup '''

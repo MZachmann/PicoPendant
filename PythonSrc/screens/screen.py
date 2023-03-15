@@ -56,7 +56,7 @@ class pp_screen :
 		''' draw the base screen and set up variables '''
 		pass
 
-	def Loop(self) :
+	async def Loop(self) :
 		''' do a control loop responding to stuff '''
 		pass
 

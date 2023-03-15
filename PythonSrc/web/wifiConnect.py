@@ -20,7 +20,7 @@ def doConnect(ssid) :
 		idx = gls['wlan_ssids'].index(ssid)
 		if idx >= 0 :
 			pw = gls['wlan_passwords'][idx]
-			print('conn %s %s' % (ssid,pw))
+			print('conn %s %s' % (ssid,pw)) # ! security issue...
 			wlan.connect(ssid, pw)
 			gls['wlan_ssid'] = ssid
 			sleep_ms(1000)
