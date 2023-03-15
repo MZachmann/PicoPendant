@@ -2,8 +2,6 @@
 # --------------------------
 from network import WLAN, STA_IF
 import ujson as json
-# import urequests
-# import web.ureqorig as urequests
 import web.arequest as arequest
 from utime import ticks_ms, ticks_diff, ticks_add
 from display.colorSet import SolidClr

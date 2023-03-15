@@ -1,3 +1,5 @@
+# originally from https://github.com/StevenRuest/async_urequests
+# this is a very lightweight async version of urequests for Micropython
 import uasyncio as asyncio
 
 HTTP__version__ = "1.0"
@@ -121,8 +123,8 @@ async def _request_raw(method, url, headers, data, json):
             ssl = True
         else:
             raise ValueError("Unsupported protocol: %s" % (proto))
-    # using new open_connection rather than uasyncio.open_connection to add ssl support
-    reader, writer = await open_connection(host, port, ssl)
+    # -not- using new open_connection rather than uasyncio.open_connection to add ssl support
+    reader, writer = await asyncio.open_connection(host, port) # open_connection(host, port, ssl)
     query = "%s /%s HTTP/%s\r\nHost: %s\r\nConnection: close\r\n%s" % (method, path, HTTP__version__, host, headers)
     if "User-Agent:" not in query:
         query += "User-Agent: compat\r\n"
