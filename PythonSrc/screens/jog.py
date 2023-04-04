@@ -325,11 +325,11 @@ class JogScreen(pp_screen) :
 		if self.isParsing or self.isGoing:
 			return
 		self.isParsing = True
-		print('request rr_status')
 		try :
 			u = None
 			s = self.GetDeviceIp()
 			if s is not None :
+				print('request rr_status')
 				u = await arequest.get(s + '/rr_status')
 				if u is not None :
 					# u.close() # required for mem cleanup ?
@@ -354,9 +354,9 @@ class JogScreen(pp_screen) :
 		# move in mm?
 		try :
 			gcode = '/rr_gcode?gcode=G0' + axis + str(position)
-			print('gcode = %s' % gcode)
 			s = self.GetDeviceIp()
 			if s is not None :
+				print('gcode = %s' % gcode)
 				u = await arequest.get(s + gcode)
 				#if u is not None :
 				#	self.UpdatePosition(u.content) # ['body'])
@@ -573,7 +573,6 @@ class JogScreen(pp_screen) :
 				await asyncio.sleep(0)
 
 				u = self.Dial1.ButtonState
-				await asyncio.sleep(0)
 				if u and u == self.Dial2.ButtonState :
 					self.doRun = False	# quit this
 				await asyncio.sleep(0)

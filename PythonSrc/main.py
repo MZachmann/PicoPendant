@@ -14,4 +14,9 @@ try:
 	from web import wifiConnect
 except Exception as e:
 	print(str(e))
+
+from utime import sleep_ms
+sleep_ms(2000)
+import runjog
+
 	
